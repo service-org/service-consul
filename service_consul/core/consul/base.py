@@ -4,13 +4,13 @@
 
 from __future__ import annotations
 
-
+import logging
 import typing as t
 
 from logging import getLogger
 from inspect import getmembers
 from eventlet.green import http
-from service_green.core.green import json
+from urllib.parse import urlencode
 from service_green.core.green import urllib3
 from service_consul.exception import ConsulError
 
@@ -20,32 +20,22 @@ if t.TYPE_CHECKING:
     # 客户端类型
     ConsulClient = t.TypeVar('ConsulClient', bound='BaseConsulClient')
 
-
 logger = getLogger(__name__)
 
-class ConsulAPIMixin(object):
-    """ Consul接口扩展类 """
-
-    @staticmethod
-    def was_api(obj: t.Any) -> bool:
-        """ 是接口实例吗?
-
-        @param obj: 任意对象
-        @return: bool
-        """
-        return isinstance(obj, BaseConsulAPI)
+__all__ = ['BaseConsulClient', 'BaseConsulAPI']
 
 
-class BaseConsulAPI(ConsulAPIMixin):
+def is_consul_api(obj: t.Any) -> bool:
+    """ 是否为Consul api?
+
+    @param obj: 任意对象
+    @return: bool
+    """
+    return isinstance(obj, BaseConsulAPI)
+
+
+class BaseConsulAPI(object):
     """ Consul接口基类 """
-
-    def set_client(self, client) -> None:
-        """ 创建接口实例
-
-        @param data: 数据
-        @return: ConsulAPI
-        """
-        self.client = client
 
     def __init__(self, client: t.Optional[ConsulClient] = None) -> None:
         """ 初始化实例
@@ -54,56 +44,44 @@ class BaseConsulAPI(ConsulAPIMixin):
         """
         self.client = client
 
-    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> ConsulAPI:
-        """ 创建接口实例
-
-        @param args  : 位置参数
-        @param kwargs: 接口参数
-        """
-        instance = super(BaseConsulAPI, cls).__new__(cls, *args, **kwargs)
-        for name, api in getmembers(cls, predicate=cls.was_api):
-            api.set_client(instance.client)
-            setattr(instance, name, api)
-        return instance
-
     def _get(self, url, **kwargs) -> t.Any:
-        """ GET请求方法
+        """ 请求方法 - get
 
-        :param url: 请求地址
-        :param kwargs: 命名参数
-        :return: t.Any
+        @param url: 请求地址
+        @param kwargs: 请求参数
+        @return: t.Any
         """
-        kwargs['base_url'] = getattr(self, 'base_url', '') or ''
+        hasattr(self, 'base_url') and kwargs.update({'base_url': self.base_url})
         return self.client.get(url, **kwargs)
 
     def _post(self, url, **kwargs) -> t.Any:
-        """ POST请求方法
+        """ 请求方法 - post
 
-        :param url: 请求地址
-        :param kwargs: 命名参数
-        :return: t.Any
+        @param url: 请求地址
+        @param kwargs: 请求参数
+        @return: t.Any
         """
-        kwargs['base_url'] = getattr(self, 'base_url', '') or ''
+        hasattr(self, 'base_url') and kwargs.update({'base_url': self.base_url})
         return self.client.post(url, **kwargs)
 
     def _put(self, url, **kwargs) -> t.Any:
-        """ PUT请求方法
+        """ 请求方法 - put
 
-        :param url: 请求地址
-        :param kwargs: 命名参数
-        :return: t.Any
+        @param url: 请求地址
+        @param kwargs: 请求参数
+        @return: t.Any
         """
-        kwargs['base_url'] = getattr(self, 'base_url', '') or ''
+        hasattr(self, 'base_url') and kwargs.update({'base_url': self.base_url})
         return self.client.put(url, **kwargs)
 
     def _patch(self, url, **kwargs) -> t.Any:
-        """ PATCH请求方法
+        """ 请求方法 - patch
 
-        :param url: 请求地址
-        :param kwargs: 命名参数
-        :return: t.Any
+        @param url: 请求地址
+        @param kwargs: 请求参数
+        @return: t.Any
         """
-        kwargs['base_url'] = getattr(self, 'base_url', '') or ''
+        hasattr(self, 'base_url') and kwargs.update({'base_url': self.base_url})
         return self.client.patch(url, **kwargs)
 
     def _delete(self, url, **kwargs) -> t.Any:
@@ -113,52 +91,114 @@ class BaseConsulAPI(ConsulAPIMixin):
         :param kwargs: 命名参数
         :return: t.Any
         """
-        kwargs['base_url'] = getattr(self, 'base_url', '') or ''
+        hasattr(self, 'base_url') and kwargs.update({'base_url': self.base_url})
         return self.client.delete(url, **kwargs)
 
-
-class BaseConsulClient(ConsulAPIMixin):
-    """ Consul客户端基类 """
-
-    def __init__(self,
-                 host: t.Text = '127.0.0.1',
-                 port: int = 8500,
-                 scheme: t.Text = 'http',
-                 verify: bool = False,
-                 cert: t.Optional[t.Text] = None,
-                 token: t.Optional[t.Text] = None,
-                 pool_size: int = 1024):
-        """ 初始化实例
-
-        @param host: 目标地址
-        @param port: 目标端口
-        @param scheme: 使用协议
-        @param verify: 是否验证
-        @param cert: 指定证书
-        @param token: 请求令牌
-        @param pool_size: 请求池大小
-        """
-        self.host = host
-        self.port = port
-        self.schema = scheme
-        self.cert = cert
-        self.token = token
-        self.verify = verify
-        self.base_url = f'{scheme}://{host}:{port}'
-        self.http = urllib3.PoolManager(num_pools=pool_size)
-
-    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> ConsulClient:
+    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> ConsulAPI:
         """ 创建接口实例
 
         @param args  : 位置参数
         @param kwargs: 接口参数
         """
-        instance = super(BaseConsulClient, cls).__new__(cls, *args, **kwargs)
-        print(getmembers(cls))
-        for name, api in getmembers(cls, predicate=cls.was_api):
-            api.set_client(instance)
+        instance = super(BaseConsulAPI, cls).__new__(cls, *args, **kwargs)
+        # 获取当前类中为ConsulAPI实例的类属性
+        all_apis = getmembers(cls, predicate=is_consul_api)
+        for name, api in all_apis:
+            # 向子API实例传递客户端CLIENT实例
+            api.client = instance.client
             setattr(instance, name, api)
         return instance
+
+
+class BaseConsulClient(object):
+    """ Consul客户端基类 """
+
+    def __init__(self,
+                 host: t.Text = '127.0.0.1',
+                 port: int = 8500,
+                 debug: bool = False,
+                 scheme: t.Text = 'http',
+                 verify: bool = False,
+                 cert: t.Optional[t.Text] = None,
+                 acl_token: t.Optional[t.Text] = None,
+                 pool_size: int = 10240):
+        """ 初始化实例
+
+        @param host     : 目标地址
+        @param port     : 目标端口
+        @param debug    : 开启调试
+        @param scheme   : 使用协议
+        @param verify   : 是否验证
+        @param cert     : 指定证书
+        @param acl_token: 请求令牌
+        @param pool_size: 池子大小
+        """
+        self.host = host
+        self.port = port
+        self.cert = cert
+
+        self.schema = scheme
+        self.verify = verify
+        self.acl_token = acl_token
+
+        # 开启debug的模式打印请求
+        debug and getLogger('urllib3').setLevel(
+            logging.DEBUG
+        )
+        # 创建一个请求连接池管理器
+        self.http = urllib3.PoolManager(
+            num_pools=pool_size
+        )
+
+    def get(self, url: t.Text, **kwargs: t.Text) -> t.Any:
+        """ 请求方法 - get
+
+        @param url: 请求地址
+        @param kwargs: 请求参数
+        @return: t.Any
+        """
+        method = 'get'
+        return self.request(method, url, **kwargs)
+
+    def post(self, url: t.Text, **kwargs: t.Text) -> t.Any:
+        """ 请求方法 - post
+
+        @param url: 请求地址
+        @param kwargs: 请求参数
+        @return: t.Any
+        """
+        method = 'post'
+        return self.request(method, url, **kwargs)
+
+    def put(self, url: t.Text, **kwargs: t.Text) -> t.Any:
+        """ 请求方法 - put
+
+        @param url: 请求地址
+        @param kwargs: 请求参数
+        @return: t.Any
+        """
+        method = 'put'
+        return self.request(method, url, **kwargs)
+
+    def patch(self, url: t.Text, **kwargs: t.Text) -> t.Any:
+        """ 请求方法 - patch
+
+        @param url: 请求地址
+        @param kwargs: 请求参数
+        @return: t.Any
+        """
+        method = 'patch'
+        return self.request(method, url, **kwargs)
+
+    def delete(self, url: t.Text, **kwargs: t.Text) -> t.Any:
+        """ 请求方法 - delete
+
+        @param url: 请求地址
+        @param kwargs: 请求参数
+        @return: t.Any
+        """
+        method = 'delete'
+        return self.request(method, url, **kwargs)
 
     def request(self, method: t.Text, url: t.Text, **kwargs: t.Text) -> t.Any:
         """ 请求处理方法
@@ -168,67 +208,46 @@ class BaseConsulClient(ConsulAPIMixin):
         :param kwargs: 请求参数
         :return: t.Any
         """
-        kwargs.setdefault('timeout', None)
-        kwargs.setdefault('headers', {})
-        kwargs.setdefault('retries', None)
-        self.token and kwargs['headers'].update({'X-Consul-Token': self.token})
-        base_url = kwargs.pop('base_url', '') or self.base_url
-        url = url if url.startswith(('http', 'https')) else '{}{}'.format(base_url, url)
-        resp = self.http.request(method, url, **kwargs)
-        data = resp.data.decode('utf-8')
-        if resp.status != http.HTTPStatus.OK.value:
-            raise ConsulError(data)
-        print('!' * 100)
-        print(data)
-        print('!' * 100)
-        return json.loads(data)
+        # https://urllib3.readthedocs.io/en/stable/user-guide.html#query-parameters
+        if method.upper() not in ('GET', 'HEAD', 'DELETE'):
+            url = f'{url}?{urlencode(kwargs.pop("fields", {}))}'
+        if 'timeout' not in kwargs:
+            kwargs['timeout'] = None
+        if 'headers' not in kwargs:
+            kwargs['headers'] = {}
+        if 'retries' not in kwargs:
+            kwargs['retries'] = None
+        if self.acl_token:
+            kwargs['headers']['X-Consul-Token'] = self.acl_token
+        if 'base_url' in kwargs and kwargs['base_url']:
+            base_url = kwargs.pop('base_url')
+        else:
+            base_url = f'{self.schema}://{self.host}:{self.port}'
+        if url.startswith(('http', 'https')):
+            endpoint = url
+        else:
+            endpoint = f'{base_url}{url}'
+        rsp = self.http.request(method, endpoint, **kwargs)
+        rsp_data = rsp.data.decode('utf-8')
+        if (
+                http.HTTPStatus.OK.value
+                <= rsp.status <
+                http.HTTPStatus.MULTIPLE_CHOICES.value
+        ):
+            return rsp_data
+        raise ConsulError(rsp_data, original=endpoint)
 
-    def get(self, url: t.Text, **kwargs: t.Text) -> t.Any:
-        """ GET请求方法
+    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> ConsulClient:
+        """ 创建接口实例
 
-        :param url: 请求地址
-        :param kwargs: 请求参数
-        :return: t.Any
+        @param args  : 位置参数
+        @param kwargs: 接口参数
         """
-        method = 'GET'
-        return self.request(method, url, **kwargs)
-
-    def post(self, url: t.Text, **kwargs: t.Text) -> t.Any:
-        """ POST请求方法
-
-        :param url: 请求地址
-        :param kwargs: 请求参数
-        :return: t.Any
-        """
-        method = 'POST'
-        return self.request(method, url, **kwargs)
-
-    def put(self, url: t.Text, **kwargs: t.Text) -> t.Any:
-        """ PUT请求方法
-
-        :param url: 请求地址
-        :param kwargs: 请求参数
-        :return: ...
-        """
-        method = 'PUT'
-        return self.request(method, url, **kwargs)
-
-    def patch(self, url: t.Text, **kwargs: t.Text) -> t.Any:
-        """ PATCH请求方法
-
-        :param url: 请求地址
-        :param kwargs: 请求参数
-        :return: t.Any
-        """
-        method = 'PATCH'
-        return self.request(method, url, **kwargs)
-
-    def delete(self, url: t.Text, **kwargs: t.Text) -> t.Any:
-        """ DELETE请求方法
-
-        :param url: 请求地址
-        :param kwargs: 请求参数
-        :return: t.Any
-        """
-        method = 'DELETE'
-        return self.request(method, url, **kwargs)
+        instance = super(BaseConsulClient, cls).__new__(cls, *args, **kwargs)
+        # 获取当前类中为ConsulAPI实例的类属性
+        all_apis = getmembers(cls, predicate=is_consul_api)
+        for name, api in all_apis:
+            # 向子API实例传递客户端CLIENT实例
+            api.client = instance
+            setattr(instance, name, api)
+        return instance

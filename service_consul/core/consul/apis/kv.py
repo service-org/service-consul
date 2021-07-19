@@ -37,7 +37,7 @@ class KvAPI(BaseConsulAPI):
         """
         return self._put(f'/v1/kv/{key}', **kwargs)
 
-    def delete_key(self, key: t.Text, **kwargs: t.Text) -> t.Text:
+    def delete_kv(self, key: t.Text, **kwargs: t.Text) -> t.Text:
         """ 删除键值
 
         doc: https://www.consul.io/api-docs/kv#delete-key

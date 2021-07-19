@@ -109,7 +109,7 @@ class BaseConsulKvRegistDependency(BaseConsulRegistDependency):
 
         @return: None
         """
-        self.client.kv.put_kv(self.ident)
+        self.client.kv.put_kv(self.ident, body=self.value)
         super(BaseConsulKvRegistDependency, self).start()
 
     def stop(self) -> None:

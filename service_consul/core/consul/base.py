@@ -228,14 +228,14 @@ class BaseConsulClient(object):
         else:
             endpoint = f'{base_url}{url}'
         rsp = self.http.request(method, endpoint, **kwargs)
-        rsp_data = rsp.data.decode('utf-8')
         if (
                 http.HTTPStatus.OK.value
                 <= rsp.status <
                 http.HTTPStatus.MULTIPLE_CHOICES.value
         ):
-            return rsp_data
-        raise ConsulError(rsp_data, original=endpoint)
+            return rsp
+        data = rsp.data.decode('utf-8')
+        raise ConsulError(data, original=endpoint)
 
     def __new__(cls, *args: t.Any, **kwargs: t.Any) -> ConsulClient:
         """ 创建接口实例

@@ -23,6 +23,7 @@ class ConsulDependency(BaseDependency):
         """
         self.alias = alias
         self.client = None
+        self.center = kwargs.pop('data_center', '')
         skip_inject = kwargs.pop('skip_inject', False)
         skip_loaded = kwargs.pop('skip_loaded', False)
         self.kwargs = kwargs

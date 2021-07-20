@@ -7,6 +7,8 @@ from __future__ import annotations
 import os
 import json
 import pprint
+import sys
+
 import eventlet
 import typing as t
 
@@ -139,8 +141,9 @@ class BaseConsulKvRegistDependency(BaseConsulRegistDependency):
         index, wait, sleep_seconds_when_exception = '0', '5m', 1
         while True:
             try:
+
                 fields = {'keys': True, 'index': index, 'wait': wait}
-                resp = self.client.kv.get_kv(prefix, fields=fields)
+                resp = self.client.kv.get_kv(prefix, fields=fields, retries=False)
                 data, curr = json.loads(resp.data.decode('utf-8')), {}
                 for key in data:
                     all_parts = key.rsplit('/')
@@ -151,6 +154,7 @@ class BaseConsulKvRegistDependency(BaseConsulRegistDependency):
                 for key in curr:
                     self.cache.setdefault(key, set())
                     self.cache[key] = curr[key]
+                self.client.kv.put_kv(self.ident, body=self.value, retries=False)
                 index = resp.headers.get('X-Consul-Index', index)
             except BaseException:
                 logger.error(f'unexpected error while watch key', exc_info=True)

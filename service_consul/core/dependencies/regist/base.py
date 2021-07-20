@@ -137,11 +137,11 @@ class BaseConsulKvRegistDependency(BaseConsulRegistDependency):
 
         @return:None
         """
-        health, prefix = True, self.ident.split('/')[0]
+        prefix = self.ident.split('/')[0]
         index, wait, sleep_seconds_when_exception = '0', '5m', 1
         while True:
             try:
-                fields = {'keys': True, 'index': index, 'wait': wait}
+                fields = {'keys': True, 'index': index, 'wait': wait, 'recurse': True}
                 resp = self.client.kv.get_kv(prefix, fields=fields, retries=False)
                 data, curr = json.loads(resp.data.decode('utf-8')), {}
                 for key in data:
@@ -153,11 +153,8 @@ class BaseConsulKvRegistDependency(BaseConsulRegistDependency):
                 for key in curr:
                     self.cache.setdefault(key, set())
                     self.cache[key] = curr[key]
-                not health and self.client.kv.put_kv(self.ident, body=self.value, retries=False)
                 index = resp.headers.get('X-Consul-Index', index)
-                health = True
             except BaseException:
-                health = False
                 logger.error(f'unexpected error while watch key', exc_info=True)
                 eventlet.sleep(sleep_seconds_when_exception)
                 continue

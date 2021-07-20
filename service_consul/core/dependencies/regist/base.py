@@ -4,10 +4,19 @@
 
 from __future__ import annotations
 
+import os
+import json
+import pprint
+import eventlet
 import typing as t
 
 from string import Template
+from logging import getLogger
+from collections import namedtuple
 from service_consul.core.dependencies.consul import ConsulDependency
+
+logger = getLogger(__name__)
+Connection = namedtuple('Connection', ['host', 'port'])
 
 
 class BaseConsulRegistDependency(ConsulDependency):
@@ -122,6 +131,30 @@ class BaseConsulKvRegistDependency(BaseConsulRegistDependency):
     def watch(self) -> None:
         """ 用阻塞查询监控键变化
 
-        @return: None
+        doc: https://www.consul.io/api/features/blocking
+
+        @return:None
         """
-        raise NotImplementedError
+        prefix = self.ident.split('/')[0]
+        index, wait, sleep_seconds_when_exception = '0', '5m', 1
+        while True:
+            try:
+                fields = {'keys': True, 'index': index, 'wait': wait}
+                resp = self.client.kv.get_kv(prefix, fields=fields)
+                data, curr = json.loads(resp.data.decode('utf-8')), {}
+                for key in data:
+                    all_parts = key.rsplit('/')
+                    name, addr = all_parts[-2], all_parts[-1]
+                    connection = Connection(*addr.split(':', 1))
+                    curr.setdefault(name, set())
+                    curr[name].add(connection)
+                for key in curr:
+                    self.cache.setdefault(key, set())
+                    self.cache[key] = curr[key]
+                index = resp.headers.get('X-Consul-Index', index)
+            except BaseException:
+                logger.error(f'unexpected error while watch key', exc_info=True)
+                eventlet.sleep(sleep_seconds_when_exception)
+                continue
+            all_service_str = os.linesep + pprint.pformat(self.cache)
+            logger.debug(f'registered services {all_service_str} changed')

@@ -13,6 +13,7 @@ import typing as t
 
 from string import Template
 from logging import getLogger
+from greenlet import GreenletExit
 from collections import namedtuple
 from service_consul.core.dependencies.consul import ConsulDependency
 
@@ -154,7 +155,9 @@ class BaseConsulKvRegistDependency(BaseConsulRegistDependency):
                     self.cache.setdefault(key, set())
                     self.cache[key] = curr[key]
                 index = resp.headers.get('X-Consul-Index', index)
-            except BaseException:
+            except (KeyboardInterrupt, SystemExit, GreenletExit):
+                break
+            except:
                 logger.error(f'unexpected error while watch key', exc_info=True)
                 eventlet.sleep(sleep_seconds_when_exception)
                 continue

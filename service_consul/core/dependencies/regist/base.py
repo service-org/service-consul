@@ -21,8 +21,8 @@ logger = getLogger(__name__)
 Connection = namedtuple('Connection', ['host', 'port'])
 
 
-class BaseConsulRegistDependency(ConsulDependency):
-    """ Consul注册类 """
+class ConsulRegistDependency(ConsulDependency):
+    """ Consul注册基类 """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """ 初始化实例
@@ -30,7 +30,7 @@ class BaseConsulRegistDependency(ConsulDependency):
         @param   args: 位置参数
         @param kwargs: 命名参数
         """
-        super(BaseConsulRegistDependency, self).__init__(*args, **kwargs)
+        super(ConsulRegistDependency, self).__init__(*args, **kwargs)
 
     def start(self) -> None:
         """ 生命周期 - 启动阶段
@@ -56,7 +56,7 @@ class BaseConsulRegistDependency(ConsulDependency):
         raise NotImplementedError
 
 
-class BaseConsulAgentRegistDependency(BaseConsulRegistDependency):
+class ConsulAgentRegistDependency(ConsulRegistDependency):
     """ Consul代理注册类 """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
@@ -65,7 +65,7 @@ class BaseConsulAgentRegistDependency(BaseConsulRegistDependency):
         @param   args: 位置参数
         @param kwargs: 命名参数
         """
-        super(BaseConsulRegistDependency, self).__init__(*args, **kwargs)
+        super(ConsulAgentRegistDependency, self).__init__(*args, **kwargs)
 
     def stop(self) -> None:
         """ 生命周期 - 停止阶段
@@ -82,7 +82,7 @@ class BaseConsulAgentRegistDependency(BaseConsulRegistDependency):
         raise NotImplementedError
 
 
-class BaseConsulKvRegistDependency(BaseConsulRegistDependency):
+class ConsulKvRegistDependency(ConsulRegistDependency):
     """ Consul键值注册类 """
 
     def __init__(self, alias: t.Text, key_format: t.Text = '', val_format: t.Text = '', **kwargs: t.Text) -> None:
@@ -94,19 +94,19 @@ class BaseConsulKvRegistDependency(BaseConsulRegistDependency):
         @param skip_inject: 跳过注入
         @param skip_loaded: 跳过加载
         """
+        super(ConsulKvRegistDependency, self).__init__(alias, **kwargs)
         self.cache = {}
         self.ident = None
         self.value = None
-        self.key_format = key_format
-        self.val_format = val_format
-        super(BaseConsulRegistDependency, self).__init__(alias, **kwargs)
+        self.key_format = key_format  # DEFAULT_APISIX_CONSUL_KEY_FORMAT
+        self.val_format = val_format  # DEFAULT_APISIX_CONSUL_VAL_FORMAT
 
     def setup(self) -> None:
         """ 生命周期 - 载入阶段
 
         @return: None
         """
-        super(BaseConsulRegistDependency, self).setup()
+        super(ConsulKvRegistDependency, self).setup()
         context = {
             'name': self.container.service.name,
             'host': self.container.service.host,
@@ -121,7 +121,7 @@ class BaseConsulKvRegistDependency(BaseConsulRegistDependency):
         @return: None
         """
         self.client.kv.put_kv(self.ident, body=self.value)
-        super(BaseConsulKvRegistDependency, self).start()
+        super(ConsulKvRegistDependency, self).start()
 
     def stop(self) -> None:
         """ 生命周期 - 关闭阶段
@@ -141,23 +141,24 @@ class BaseConsulKvRegistDependency(BaseConsulRegistDependency):
         index, wait, sleep_seconds_when_exception = '0', '5m', 1
         while True:
             try:
+                # 通过传递index和wait参数来进行阻塞查询接口数据是否变更
                 fields = {'keys': True, 'index': index, 'wait': wait,
                           'dc': self.center, 'recurse': True}
                 resp = self.client.kv.get_kv(prefix, fields=fields, retries=False)
-                data, curr = json.loads(resp.data.decode('utf-8')), {}
+                data, cache = json.loads(resp.data.decode('utf-8')), {}
                 for key in data:
                     all_parts = key.rsplit('/')
                     name, addr = all_parts[-2], all_parts[-1]
                     connection = Connection(*addr.split(':', 1))
-                    curr.setdefault(name, set())
-                    curr[name].add(connection)
-                for key in curr:
-                    self.cache.setdefault(key, set())
-                    self.cache[key] = curr[key]
+                    cache.setdefault(name, set())
+                    cache[name].add(connection)
+                self.cache = cache
                 index = resp.headers.get('X-Consul-Index', index)
+                # 优雅处理如ctrl + c, sys.exit, kill thread时的异常
             except (KeyboardInterrupt, SystemExit, GreenletExit):
                 break
             except:
+                # 应该避免其它未知异常中断当前触发器导致检测任务无法被调度
                 logger.error(f'unexpected error while watch key', exc_info=True)
                 eventlet.sleep(sleep_seconds_when_exception)
                 continue

@@ -6,12 +6,12 @@ from __future__ import annotations
 
 import typing as t
 
-from service_consul.core.consul import ConsulClient
+from service_consul.core.consul import Consul
 from service_consul.constants import CONSUL_CONFIG_KEY
-from service_core.core.service.dependency import BaseDependency
+from service_core.core.service.dependency import Dependency
 
 
-class ConsulDependency(BaseDependency):
+class ConsulDependency(Dependency):
     """ Consul依赖类 """
 
     def __init__(self, alias: t.Text, **kwargs: t.Text) -> None:
@@ -36,4 +36,4 @@ class ConsulDependency(BaseDependency):
         """
         config = self.container.config.get(f'{CONSUL_CONFIG_KEY}.{self.alias}', default={})
         config.update(self.kwargs)
-        self.client = ConsulClient(**config)
+        self.client = Consul(**config)

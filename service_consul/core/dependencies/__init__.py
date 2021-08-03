@@ -5,5 +5,4 @@
 from __future__ import annotations
 
 from .consul import ConsulDependency
-from .regist.apisix import ApisixConsulRegistDependency
-
+from .regist.apisix import ApisixConsulKvRegistDependency

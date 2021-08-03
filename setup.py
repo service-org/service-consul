@@ -26,5 +26,5 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.9',
     ],
-    install_requires=['service-core']
+    install_requires=['service-core', 'service-green']
 )

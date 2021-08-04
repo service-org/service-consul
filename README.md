@@ -82,9 +82,10 @@ app = Server()
 
 > core start facade --debug
 
-# 客户端调试
+# 接口调试
 
 > core shell --shell `shell`
+
 ```shell
 C:\Program Files\Python39\lib\site-packages\service_core-0.0.1-py3.9.egg\service_core\cli\main.py:39: UserWarning:
 * eventlet 0.31.1
@@ -108,6 +109,6 @@ PtPython - 3.9.6 (tags/v3.9.6:db3ff76, Jun 28 2021, 15:26:21) [MSC v.1929 64 bit
 ['apisix-service-upstreams/consul/10.219.255.176:49234']
 ```
 
-# 运行时调试
+# 运行调试
 
 > core debug --port `port`

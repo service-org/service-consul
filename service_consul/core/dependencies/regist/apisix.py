@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import typing as t
 
-from .base import ConsulKvRegistDependency
+from .base.kv import ConsulKvRegistDependency
 
 DEFAULT_APISIX_CONSUL_KEY_FORMAT = 'apisix-service-upstreams/$name/$host:$port'
 DEFAULT_APISIX_CONSUL_VAL_FORMAT = '{"weight": 1, "max_fails": 2, "fail_timeout": 1}'

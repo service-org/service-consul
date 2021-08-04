@@ -32,15 +32,15 @@ class ConsulClient(object):
     """ Consul客户端基类 """
 
     def __init__(
-            self,
-            host: t.Text = '127.0.0.1',
-            port: int = 8500,
-            debug: bool = False,
-            scheme: t.Text = 'http',
-            verify: bool = False,
+            self, *,
+            host: t.Optional[t.Text] = None,
+            port: t.Optional[int] = None,
+            debug: t.Optional[bool] = None,
+            scheme: t.Optional[t.Text] = None,
+            verify: t.Optional[bool] = None,
             cert: t.Optional[t.Text] = None,
             acl_token: t.Optional[t.Text] = None,
-            pool_size: int = 10240
+            pool_size: t.Optional[int] = None
     ) -> None:
         """ 初始化实例
 
@@ -53,71 +53,88 @@ class ConsulClient(object):
         @param acl_token: 请求令牌
         @param pool_size: 池子大小
         """
-        self.host = host
-        self.port = port
+        self.host = host or '127.0.0.1'
+        self.port = port or 8500
         self.cert = cert
 
-        self.schema = scheme
-        self.verify = verify
+        self.schema = scheme or 'http'
+        self.verify = verify or False
         self.acl_token = acl_token
-        # 创建一个请求连接池管理器
-        self.http = urllib3.PoolManager(
-            num_pools=pool_size
-        )
         # 开启debug的模式打印请求
         req_logger = getLogger('urllib3')
         debug and req_logger.setLevel(
             level=logging.DEBUG
         )
+        # 创建一个请求连接池管理器
+        pool_size = pool_size or 10240
+        self.http = urllib3.PoolManager(
+            num_pools=pool_size
+        )
+
+    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> ConsulClient:
+        """ 创建接口实例
+
+        @param args  : 位置参数
+        @param kwargs: 命名参数
+        """
+        instance = super(ConsulClient, cls).__new__(cls)
+        curr_consul_client_instance = instance
+        # 获取当前类中为ConsulAPI实例的类属性
+        all_apis = getmembers(cls, predicate=is_consul_api)
+        for name, api in all_apis:
+            # 向子API实例传递客户端CLIENT实例
+            api.client = instance
+            setattr(instance, name, api)
+        return curr_consul_client_instance
 
     def get(self, url: t.Text, **kwargs: t.Text) -> t.Any:
-        """ 请求方法 - get
+        """ 请求方法 - GET
 
         @param url: 请求地址
         @param kwargs: 请求参数
         @return: t.Any
         """
-        method = 'get'
+        method = 'GET'
         return self.request(method, url, **kwargs)
 
     def post(self, url: t.Text, **kwargs: t.Text) -> t.Any:
-        """ 请求方法 - post
+        """ 请求方法 - POST
 
         @param url: 请求地址
         @param kwargs: 请求参数
         @return: t.Any
         """
-        method = 'post'
+        method = 'POST'
         return self.request(method, url, **kwargs)
 
     def put(self, url: t.Text, **kwargs: t.Text) -> t.Any:
-        """ 请求方法 - put
+        """ 请求方法 - PUT
 
         @param url: 请求地址
         @param kwargs: 请求参数
         @return: t.Any
         """
-        method = 'put'
+        method = 'PUT'
         return self.request(method, url, **kwargs)
 
     def patch(self, url: t.Text, **kwargs: t.Text) -> t.Any:
-        """ 请求方法 - patch
+        """ 请求方法 - PATCH
 
         @param url: 请求地址
         @param kwargs: 请求参数
         @return: t.Any
         """
-        method = 'patch'
+        method = 'PATCH'
         return self.request(method, url, **kwargs)
 
     def delete(self, url: t.Text, **kwargs: t.Text) -> t.Any:
-        """ 请求方法 - delete
+        """ 请求方法 - DELETE
 
         @param url: 请求地址
         @param kwargs: 请求参数
         @return: t.Any
         """
-        method = 'delete'
+        method = 'DELETE'
         return self.request(method, url, **kwargs)
 
     def request(self, method: t.Text, url: t.Text, **kwargs: t.Text) -> t.Any:
@@ -157,21 +174,6 @@ class ConsulClient(object):
         data = rsp.data.decode('utf-8')
         raise ConsulError(data, original=endpoint)
 
-    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> ConsulClient:
-        """ 创建接口实例
-
-        @param args  : 位置参数
-        @param kwargs: 接口参数
-        """
-        instance = super(ConsulClient, cls).__new__(cls)
-        # 获取当前类中为ConsulAPI实例的类属性
-        all_apis = getmembers(cls, predicate=is_consul_api)
-        for name, api in all_apis:
-            # 向子API实例传递客户端CLIENT实例
-            api.client = instance
-            setattr(instance, name, api)
-        return instance
-
 
 class ConsulAPI(object):
     """ Consul接口基类 """
@@ -182,6 +184,22 @@ class ConsulAPI(object):
         @param client: 客户端
         """
         self.client = client
+
+    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> ConsulAPI:
+        """ 创建接口实例
+
+        @param args  : 位置参数
+        @param kwargs: 接口参数
+        """
+        instance = super(ConsulAPI, cls).__new__(cls)
+        current_consul_api_instance = instance
+        # 获取当前类中为ConsulAPI实例的类属性
+        all_apis = getmembers(cls, predicate=is_consul_api)
+        for name, api in all_apis:
+            # 向子API实例传递客户端CLIENT实例
+            api.client = instance.client
+            setattr(instance, name, api)
+        return current_consul_api_instance
 
     def _get(self, url: t.Text, **kwargs: t.Any) -> t.Any:
         """ 请求方法 - get
@@ -232,18 +250,3 @@ class ConsulAPI(object):
         """
         hasattr(self, 'base_url') and kwargs.update({'base_url': self.base_url})
         return self.client.delete(url, **kwargs)
-
-    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> ConsulAPI:
-        """ 创建接口实例
-
-        @param args  : 位置参数
-        @param kwargs: 接口参数
-        """
-        instance = super(ConsulAPI, cls).__new__(cls)
-        # 获取当前类中为ConsulAPI实例的类属性
-        all_apis = getmembers(cls, predicate=is_consul_api)
-        for name, api in all_apis:
-            # 向子API实例传递客户端CLIENT实例
-            api.client = instance.client
-            setattr(instance, name, api)
-        return instance

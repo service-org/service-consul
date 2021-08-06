@@ -34,8 +34,6 @@ CONTEXT:
 
 from __future__ import annotations
 
-import typing as t
-
 from logging import getLogger
 from service_croniter.core.entrypoints import croniter
 from service_core.core.service import Service as BaseService

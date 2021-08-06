@@ -6,12 +6,12 @@ from __future__ import annotations
 
 import typing as t
 
-from service_core.cli.subctxs import Context
+from service_core.cli.subctxs import BaseContext
 from service_core.core.configure import Configure
 from service_consul.core.proxy import ConsulProxy
 
 
-class Consul(Context):
+class Consul(BaseContext):
     """ 用于调试Consul接口 """
 
     name: t.Text = 'consul'

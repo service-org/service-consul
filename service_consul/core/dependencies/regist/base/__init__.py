@@ -6,10 +6,10 @@ from __future__ import annotations
 
 import typing as t
 
-from service_consul.core.dependencies.consul import ConsulDependency
+from service_consul.core.dependencies.consul import Consul
 
 
-class ConsulRegistDependency(ConsulDependency):
+class BaseConsulRegist(Consul):
     """ Consul注册基类 """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
@@ -18,7 +18,7 @@ class ConsulRegistDependency(ConsulDependency):
         @param   args: 位置参数
         @param kwargs: 命名参数
         """
-        super(ConsulRegistDependency, self).__init__(*args, **kwargs)
+        super(BaseConsulRegist, self).__init__(*args, **kwargs)
 
     def start(self) -> None:
         """ 生命周期 - 启动阶段

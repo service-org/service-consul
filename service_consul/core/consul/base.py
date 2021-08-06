@@ -16,7 +16,7 @@ from service_consul.exception import ConsulError
 
 logger = getLogger(__name__)
 
-__all__ = ['ConsulClient', 'ConsulAPI']
+__all__ = ['BaseConsulClient', 'BaseConsulAPI']
 
 
 def is_consul_api(obj: t.Any) -> bool:
@@ -25,10 +25,10 @@ def is_consul_api(obj: t.Any) -> bool:
     @param obj: 任意对象
     @return: bool
     """
-    return isinstance(obj, ConsulAPI)
+    return isinstance(obj, BaseConsulAPI)
 
 
-class ConsulClient(object):
+class BaseConsulClient(object):
     """ Consul客户端基类 """
 
     def __init__(
@@ -71,15 +71,15 @@ class ConsulClient(object):
             num_pools=pool_size
         )
 
-    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> ConsulClient:
+    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> BaseConsulClient:
         """ 创建接口实例
 
         @param args  : 位置参数
         @param kwargs: 命名参数
         """
-        instance = super(ConsulClient, cls).__new__(cls)
+        instance = super(BaseConsulClient, cls).__new__(cls)
         curr_consul_client_instance = instance
-        # 获取当前类中为ConsulAPI实例的类属性
+        # 获取当前类中为BaseConsulAPI实例的类属性
         all_apis = getmembers(cls, predicate=is_consul_api)
         for name, api in all_apis:
             # 向子API实例传递客户端CLIENT实例
@@ -175,25 +175,25 @@ class ConsulClient(object):
         raise ConsulError(data, original=endpoint)
 
 
-class ConsulAPI(object):
+class BaseConsulAPI(object):
     """ Consul接口基类 """
 
-    def __init__(self, client: t.Optional[ConsulClient] = None) -> None:
+    def __init__(self, client: t.Optional[BaseConsulClient] = None) -> None:
         """ 初始化实例
 
         @param client: 客户端
         """
         self.client = client
 
-    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> ConsulAPI:
+    def __new__(cls, *args: t.Any, **kwargs: t.Any) -> BaseConsulAPI:
         """ 创建接口实例
 
         @param args  : 位置参数
         @param kwargs: 接口参数
         """
-        instance = super(ConsulAPI, cls).__new__(cls)
+        instance = super(BaseConsulAPI, cls).__new__(cls)
         current_consul_api_instance = instance
-        # 获取当前类中为ConsulAPI实例的类属性
+        # 获取当前类中为BaseConsulAPI实例的类属性
         all_apis = getmembers(cls, predicate=is_consul_api)
         for name, api in all_apis:
             # 向子API实例传递客户端CLIENT实例

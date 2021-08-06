@@ -6,10 +6,10 @@ from __future__ import annotations
 
 import typing as t
 
-from service_consul.core.consul.base import ConsulAPI
+from service_consul.core.consul.base import BaseConsulAPI
 
 
-class KvAPI(ConsulAPI):
+class KvAPI(BaseConsulAPI):
     """ Agent接口类
 
     doc: https://www.consul.io/api-docs/kv

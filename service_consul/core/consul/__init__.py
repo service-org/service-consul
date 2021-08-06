@@ -5,10 +5,10 @@
 from __future__ import annotations
 
 from .apis.kv import KvAPI
-from .base import ConsulClient
+from .base import BaseConsulClient
 
 
-class Consul(ConsulClient):
+class ConsulClient(BaseConsulClient):
     """ Consul客户端类 """
 
     # https://www.consul.io/api-docs/kv

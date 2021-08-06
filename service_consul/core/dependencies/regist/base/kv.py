@@ -15,13 +15,13 @@ from logging import getLogger
 from greenlet import GreenletExit
 from collections import namedtuple
 
-from . import ConsulRegistDependency
+from . import BaseConsulRegist
 
 logger = getLogger(__name__)
 Connection = namedtuple('Connection', ['host', 'port'])
 
 
-class ConsulKvRegistDependency(ConsulRegistDependency):
+class BaseConsulKvRegist(BaseConsulRegist):
     """ Consul KV注册类 """
 
     def __init__(self, alias: t.Text, key_format: t.Text = '', val_format: t.Text = '', **kwargs: t.Text) -> None:
@@ -33,7 +33,7 @@ class ConsulKvRegistDependency(ConsulRegistDependency):
         @param skip_inject: 跳过注入
         @param skip_loaded: 跳过加载
         """
-        super(ConsulKvRegistDependency, self).__init__(alias, **kwargs)
+        super(BaseConsulKvRegist, self).__init__(alias, **kwargs)
         self.cache = {}
         self.ident = None
         self.value = None
@@ -45,7 +45,7 @@ class ConsulKvRegistDependency(ConsulRegistDependency):
 
         @return: None
         """
-        super(ConsulKvRegistDependency, self).setup()
+        super(BaseConsulKvRegist, self).setup()
         context = {
             'name': self.container.service.name,
             'host': self.container.service.host,
@@ -60,7 +60,7 @@ class ConsulKvRegistDependency(ConsulRegistDependency):
         @return: None
         """
         self.client.kv.put_kv(self.ident, body=self.value)
-        super(ConsulKvRegistDependency, self).start()
+        super(BaseConsulKvRegist, self).start()
 
     def stop(self) -> None:
         """ 生命周期 - 关闭阶段

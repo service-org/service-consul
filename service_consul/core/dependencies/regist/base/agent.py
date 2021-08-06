@@ -6,10 +6,10 @@ from __future__ import annotations
 
 import typing as t
 
-from . import ConsulRegistDependency
+from . import BaseConsulRegist
 
 
-class ConsulAgentRegistDependency(ConsulRegistDependency):
+class BaseConsulAgentRegist(BaseConsulRegist):
     """ Consul代理注册类 """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
@@ -18,7 +18,7 @@ class ConsulAgentRegistDependency(ConsulRegistDependency):
         @param   args: 位置参数
         @param kwargs: 命名参数
         """
-        super(ConsulAgentRegistDependency, self).__init__(*args, **kwargs)
+        super(BaseConsulAgentRegist, self).__init__(*args, **kwargs)
 
     def stop(self) -> None:
         """ 生命周期 - 停止阶段

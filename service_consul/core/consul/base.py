@@ -7,9 +7,9 @@ from __future__ import annotations
 import logging
 import typing as t
 
+from http import HTTPStatus
 from logging import getLogger
 from inspect import getmembers
-from eventlet.green import http
 from urllib.parse import urlencode
 from service_green.core.green import urllib3
 from service_consul.exception import ConsulError
@@ -166,9 +166,9 @@ class BaseConsulClient(object):
             endpoint = f'{base_url}{url}'
         rsp = self.http.request(method, endpoint, **kwargs)
         if (
-                http.HTTPStatus.OK.value
+                HTTPStatus.OK.value
                 <= rsp.status <
-                http.HTTPStatus.MULTIPLE_CHOICES.value
+                HTTPStatus.MULTIPLE_CHOICES.value
         ):
             return rsp
         data = rsp.data.decode('utf-8')

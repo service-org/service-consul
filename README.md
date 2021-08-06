@@ -37,14 +37,14 @@ from __future__ import annotations
 import typing as t
 
 from logging import getLogger
-from service_core.core.service import Service
 from service_croniter.core.entrypoints import croniter
-from service_consul.core.dependencies import ApisixConsulKvRegistDependency
+from service_core.core.service import Service as BaseService
+from service_consul.core.dependencies import ApiSixConsulKvRegist
 
 logger = getLogger(__name__)
 
 
-class Server(Service):
+class Service(BaseService):
     """ 微服务类 """
 
     # 微服务名称
@@ -53,7 +53,7 @@ class Server(Service):
     desc = 'consul'
 
     # 作为依赖项
-    apisix = ApisixConsulKvRegistDependency(alias='test')
+    apisix = ApiSixConsulKvRegist(alias='test')
 
     @croniter.cron('* * * * * */1')
     def test_croniter_every_second_with_exec_atonce(self) -> None:
@@ -73,9 +73,9 @@ class Server(Service):
 
 from __future__ import annotations
 
-from project import Server
+from project import Service
 
-app = Server()
+app = Service()
 ```
 
 # 运行服务

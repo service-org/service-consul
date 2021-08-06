@@ -12,7 +12,7 @@ DEFAULT_APISIX_CONSUL_KEY_FORMAT = 'apisix-service-upstreams/$name/$host:$port'
 DEFAULT_APISIX_CONSUL_VAL_FORMAT = '{"weight": 1, "max_fails": 2, "fail_timeout": 1}'
 
 
-class ApisixConsulKvRegist(BaseConsulKvRegist):
+class ApiSixConsulKvRegist(BaseConsulKvRegist):
     """ Apisix注册类 """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
@@ -23,4 +23,4 @@ class ApisixConsulKvRegist(BaseConsulKvRegist):
         """
         kwargs.setdefault('key_format', DEFAULT_APISIX_CONSUL_KEY_FORMAT)
         kwargs.setdefault('val_format', DEFAULT_APISIX_CONSUL_VAL_FORMAT)
-        super(ApisixConsulKvRegist, self).__init__(*args, **kwargs)
+        super(ApiSixConsulKvRegist, self).__init__(*args, **kwargs)

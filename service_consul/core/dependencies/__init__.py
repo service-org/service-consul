@@ -5,5 +5,4 @@
 from __future__ import annotations
 
 from .consul import Consul
-from .regist.apisix import ApisixConsulKvRegist
-
+from .regist.apisix import ApiSixConsulKvRegist

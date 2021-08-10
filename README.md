@@ -57,7 +57,7 @@ class Service(BaseService):
     def test_croniter_every_second_with_exec_atonce(self) -> None:
         """ 测试每秒且立即执行
 
-        More expr_format: https://github.com/kiorky/croniter
+        doc: https://github.com/kiorky/croniter
         """
         logger.debug('yeah~ yeah~ yeah~, i am called ~')
 ```
@@ -73,7 +73,7 @@ from __future__ import annotations
 
 from project import Service
 
-app = Service()
+service = Service()
 ```
 
 # 运行服务

@@ -23,9 +23,17 @@ CONTEXT:
   - service_consul.cli.subctxs.consul:Consul
 ```
 
-# 基础用法
+# 入门案例
 
-> facade.py
+```yaml
+- config.yaml
+- facade.py
+- project
+  - __init__.py
+  - service.py
+```
+
+> service.py
 
 ```python
 #! -*- coding: utf-8 -*-

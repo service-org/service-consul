@@ -26,11 +26,11 @@ CONTEXT:
 # 入门案例
 
 ```yaml
-- config.yaml
-- facade.py
-- project
-  - __init__.py
-  - service.py
+├── config.yaml
+├── facade.py
+└── project
+    ├── __init__.py
+    └── service.py
 ```
 
 > service.py

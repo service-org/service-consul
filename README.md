@@ -46,9 +46,9 @@ class Service(BaseService):
     """ 微服务类 """
 
     # 微服务名称
-    name = 'consul'
+    name = 'demo'
     # 微服务简介
-    desc = 'consul'
+    desc = 'demo'
 
     # 作为依赖项
     apisix = ApiSixConsulKvRegist(alias='test')
@@ -104,7 +104,7 @@ PtPython - 3.9.6 (tags/v3.9.6:db3ff76, Jun 28 2021, 15:26:21) [MSC v.1929 64 bit
 >>> import json
 >>> resp = s.consul.proxy(alias='test').kv.get_kv('apisix-service-upstreams', fields={'keys': True})
 >>> json.loads(resp.data.decode('utf-8'))
-['apisix-service-upstreams/consul/10.219.255.176:49234']
+['apisix-service-upstreams/demo/10.219.255.176:49234']
 ```
 
 # 运行调试

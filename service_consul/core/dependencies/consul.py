@@ -35,5 +35,7 @@ class Consul(Dependency):
         @return: None
         """
         config = self.container.config.get(f'{CONSUL_CONFIG_KEY}.{self.alias}', default={})
+        # 防止YAML中声明值为None
+        config = config or {}
         config.update(self.kwargs)
         self.client = ConsulClient(**config)

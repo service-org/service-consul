@@ -12,7 +12,11 @@ from service_core.core.service.dependency import Dependency
 
 
 class Consul(Dependency):
-    """ Consul依赖类 """
+    """ Consul依赖类
+
+    1. 基于它的注册发现子类常对外暴露client和cache所以无需重写get_instance方法
+    2. 此扩展无需在每次请求时都注入一次get_instance实例,请设置skip_inject=True
+    """
 
     def __init__(self, alias: t.Text, **kwargs: t.Text) -> None:
         """ 初始化实例

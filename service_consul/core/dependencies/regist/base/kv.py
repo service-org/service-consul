@@ -84,7 +84,9 @@ class BaseConsulKvRegist(BaseConsulRegist):
                 fields = {'keys': True, 'index': index, 'wait': wait,
                           'dc': self.center, 'recurse': True}
                 # 如果之前发生了未知异常(如连接异常)则尝试重新注册此服务
-                exception_occurred and self.client.kv.put_kv(self.ident, body=self.value)
+                exception_occurred and self.client.kv.put_kv(
+                    self.ident, body=self.value, retries=False
+                )
                 resp = self.client.kv.get_kv(prefix, fields=fields, retries=False)
                 exception_occurred = False
                 data, cache = json.loads(resp.data.decode('utf-8')), {}
@@ -95,6 +97,8 @@ class BaseConsulKvRegist(BaseConsulRegist):
                     cache.setdefault(name, set())
                     cache[name].add(connection)
                 self.cache = cache
+                all_service_str = os.linesep + pprint.pformat(self.cache)
+                logger.debug(f'registered services {all_service_str} updated')
                 index = resp.headers.get('X-Consul-Index', index)
                 # 优雅处理如ctrl + c, sys.exit, kill thread时的异常
             except (KeyboardInterrupt, SystemExit, GreenletExit):
@@ -105,5 +109,3 @@ class BaseConsulKvRegist(BaseConsulRegist):
                 logger.error(f'unexpected error while watch key', exc_info=True)
                 eventlet.sleep(sleep_seconds_when_exception)
                 continue
-            all_service_str = os.linesep + pprint.pformat(self.cache)
-            logger.debug(f'registered services {all_service_str} changed')

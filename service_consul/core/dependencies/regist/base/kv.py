@@ -76,14 +76,17 @@ class BaseConsulKvRegist(BaseConsulRegist):
 
         @return:None
         """
-        prefix = self.ident.split('/')[0]
+        prefix, exception_occurred = self.ident.split('/')[0], False
         index, wait, sleep_seconds_when_exception = '0', '5m', 1
         while True:
             try:
                 # 通过传递index和wait参数来进行阻塞查询接口数据是否变更
                 fields = {'keys': True, 'index': index, 'wait': wait,
                           'dc': self.center, 'recurse': True}
+                # 如果之前发生了未知异常(如连接异常)则尝试重新注册此服务
+                exception_occurred and self.client.kv.put_kv(self.ident, body=self.value)
                 resp = self.client.kv.get_kv(prefix, fields=fields, retries=False)
+                exception_occurred = False
                 data, cache = json.loads(resp.data.decode('utf-8')), {}
                 for key in data:
                     all_parts = key.rsplit('/')
@@ -97,6 +100,7 @@ class BaseConsulKvRegist(BaseConsulRegist):
             except (KeyboardInterrupt, SystemExit, GreenletExit):
                 break
             except:
+                exception_occurred = True
                 # 应该避免其它未知异常中断当前触发器导致检测任务无法被调度
                 logger.error(f'unexpected error while watch key', exc_info=True)
                 eventlet.sleep(sleep_seconds_when_exception)

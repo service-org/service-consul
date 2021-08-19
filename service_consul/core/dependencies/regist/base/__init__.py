@@ -48,7 +48,7 @@ class BaseConsulRegist(Consul):
         self.stopped = True
         exception = (GreenletExit,)
         kill_func = AsFriendlyFunc(self.gt.kill, all_exception=exception)
-        kill_func()
+        self.gt and kill_func()
 
     def watch(self) -> None:
         """ 用阻塞查询监控键变化

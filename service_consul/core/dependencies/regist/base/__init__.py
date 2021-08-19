@@ -46,9 +46,8 @@ class BaseConsulRegist(Consul):
         @return: None
         """
         self.stopped = True
-        base_func = self.gt.kill
         exception = (GreenletExit,)
-        kill_func = AsFriendlyFunc(base_func, all_exception=exception)
+        kill_func = AsFriendlyFunc(self.gt.kill, all_exception=exception)
         kill_func()
 
     def watch(self) -> None:

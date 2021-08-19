@@ -20,13 +20,6 @@ class BaseConsulAgentRegist(BaseConsulRegist):
         """
         super(BaseConsulAgentRegist, self).__init__(*args, **kwargs)
 
-    def stop(self) -> None:
-        """ 生命周期 - 停止阶段
-
-        @return: None
-        """
-        raise NotImplementedError
-
     def watch(self) -> None:
         """ 用阻塞查询监控键变化
 

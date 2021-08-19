@@ -68,6 +68,7 @@ class BaseConsulKvRegist(BaseConsulRegist):
         @return: None
         """
         self.client.kv.delete_kv(self.ident)
+        super(BaseConsulKvRegist, self).stop()
 
     def watch(self) -> None:
         """ 用阻塞查询监控键变化
@@ -78,7 +79,7 @@ class BaseConsulKvRegist(BaseConsulRegist):
         """
         prefix, exception_occurred = self.ident.split('/')[0], False
         index, wait, sleep_seconds_when_exception = '0', '5m', 1
-        while True:
+        while not self.stopped:
             try:
                 # 通过传递index和wait参数来进行阻塞查询接口数据是否变更
                 fields = {'keys': True, 'index': index, 'wait': wait,
@@ -108,4 +109,3 @@ class BaseConsulKvRegist(BaseConsulRegist):
                 # 应该避免其它未知异常中断当前触发器导致检测任务无法被调度
                 logger.error(f'unexpected error while watch key', exc_info=True)
                 eventlet.sleep(sleep_seconds_when_exception)
-                continue

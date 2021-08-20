@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import typing as t
 
-from service_consul.core.consul import Consul
 from service_core.core.configure import Configure
+from service_consul.core.consul import ConsulClient
 from service_consul.constants import CONSUL_CONFIG_KEY
 
 
@@ -23,7 +23,7 @@ class ConsulProxy(object):
         self.config = config
         self.option = option
 
-    def __call__(self, alias: t.Text, **option: t.Text) -> Consul:
+    def __call__(self, alias: t.Text, **option: t.Text) -> ConsulClient:
         """ 代理可调用
 
         @param alias: 配置别名
@@ -36,4 +36,4 @@ class ConsulProxy(object):
         config = self.config.get(f'{CONSUL_CONFIG_KEY}.{alias}', default={})
         # 调用时传递的参数配置优先级最高
         config.update(cur_option)
-        return Consul(**config)
+        return ConsulClient(**config)

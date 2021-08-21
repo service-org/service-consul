@@ -22,16 +22,13 @@ class Consul(Dependency):
         """ 初始化实例
 
         @param alias: 配置别名
-        @param skip_inject: 跳过注入
-        @param skip_loaded: 跳过加载
+        @param connect_options: 连接配置
         """
         self.alias = alias
         self.client = None
-        self.center = kwargs.pop('data_center', '')
-        skip_inject = kwargs.pop('skip_inject', False)
-        skip_loaded = kwargs.pop('skip_loaded', False)
-        self.kwargs = kwargs
-        super(Consul, self).__init__(skip_inject=skip_inject, skip_loaded=skip_loaded)
+        self.center = kwargs.get('data_center', '')
+        self.connect_options = kwargs.get('connect_options', {})
+        super(Consul, self).__init__(**kwargs)
 
     def setup(self) -> None:
         """ 生命周期 - 载入阶段
@@ -40,6 +37,5 @@ class Consul(Dependency):
         """
         config = self.container.config.get(f'{CONSUL_CONFIG_KEY}.{self.alias}', default={})
         # 防止YAML中声明值为None
-        config = config or {}
-        config.update(self.kwargs)
+        config = (config or {}) | self.connect_options
         self.client = ConsulClient(**config)

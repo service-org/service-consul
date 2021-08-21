@@ -14,26 +14,26 @@ from service_consul.constants import CONSUL_CONFIG_KEY
 class ConsulProxy(object):
     """ Consul代理类 """
 
-    def __init__(self, config: Configure, **option: t.Text) -> None:
+    def __init__(self, config: Configure, **options: t.Text) -> None:
         """ 初始化实例
 
         @param config: 配置对象
-        @param option: 其它选项
+        @param options: 其它选项
         """
         self.config = config
-        self.option = option
+        self.options = options
 
-    def __call__(self, alias: t.Text, **option: t.Text) -> ConsulClient:
+    def __call__(self, alias: t.Text, **options: t.Text) -> ConsulClient:
         """ 代理可调用
 
         @param alias: 配置别名
-        @param option: 其它选项
+        @param options: 其它选项
         @return: Consul
         """
-        cur_option = self.option
+        cur_options = self.options
         # 调用时传递的参数配置优先级最高
-        cur_option.update(option)
+        cur_options.update(options)
         config = self.config.get(f'{CONSUL_CONFIG_KEY}.{alias}', default={})
         # 调用时传递的参数配置优先级最高
-        config.update(cur_option)
+        config.update(cur_options)
         return ConsulClient(**config)

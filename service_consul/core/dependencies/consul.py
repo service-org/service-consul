@@ -18,16 +18,22 @@ class Consul(Dependency):
     2. 此扩展无需在每次请求时都注入一次get_instance实例,请设置skip_inject=True
     """
 
-    def __init__(self, alias: t.Text, **kwargs: t.Text) -> None:
+    def __init__(
+            self,
+            alias: t.Text,
+            data_center: t.Optional[t.Text] = None,
+            conn_options: t.Optional[t.Dict[t.Text, t.Any]] = None,
+            **kwargs: t.Text) -> None:
         """ 初始化实例
 
         @param alias: 配置别名
-        @param connect_options: 连接配置
+        @param data_center: 数据中心
+        @param conn_options: 连接配置
         """
         self.alias = alias
         self.client = None
-        self.center = kwargs.get('data_center', '')
-        self.connect_options = kwargs.get('connect_options', {})
+        self.data_center = data_center or ''
+        self.conn_options = conn_options or {}
         super(Consul, self).__init__(**kwargs)
 
     def setup(self) -> None:
@@ -37,5 +43,5 @@ class Consul(Dependency):
         """
         config = self.container.config.get(f'{CONSUL_CONFIG_KEY}.{self.alias}', default={})
         # 防止YAML中声明值为None
-        config = (config or {}) | self.connect_options
+        config = (config or {}) | self.conn_options
         self.client = ConsulClient(**config)

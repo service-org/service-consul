@@ -83,7 +83,7 @@ class BaseConsulKvRegist(BaseConsulRegist):
             try:
                 # 通过传递index和wait参数来进行阻塞查询接口数据是否变更
                 fields = {'keys': True, 'index': index, 'wait': wait,
-                          'dc': self.center, 'recurse': True}
+                          'dc': self.data_center, 'recurse': True}
                 # 如果之前发生了未知异常(如连接异常)则尝试重新注册此服务
                 exception_occurred and self.client.kv.put_kv(
                     self.ident, body=self.value, retries=False

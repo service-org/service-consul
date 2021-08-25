@@ -17,8 +17,9 @@ pip install -U service-consul
 ```yaml
 CONSUL:
   test:
-    host: 127.0.0.1
-    port: 8500
+    connect_options:
+      host: 127.0.0.1
+      port: 8500
 CONTEXT:
   - service_consul.cli.subctxs.consul:Consul
 ```

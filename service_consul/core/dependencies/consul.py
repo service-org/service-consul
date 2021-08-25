@@ -41,7 +41,9 @@ class Consul(Dependency):
 
         @return: None
         """
-        config = self.container.config.get(f'{CONSUL_CONFIG_KEY}.{self.alias}', default={})
+        data_center = self.container.config.get(f'{CONSUL_CONFIG_KEY}.{self.alias}.data_center', default='')
+        self.data_center = self.data_center or data_center
+        connect_options = self.container.config.get(f'{CONSUL_CONFIG_KEY}.{self.alias}.connect_options', default={})
         # 防止YAML中声明值为None
-        config = (config or {}) | self.connect_options
-        self.client = ConsulClient(**config)
+        connect_options = (connect_options or {}) | self.connect_options
+        self.client = ConsulClient(**connect_options)

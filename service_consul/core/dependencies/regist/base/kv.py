@@ -78,7 +78,7 @@ class BaseConsulKvRegist(BaseConsulRegist):
         @return:None
         """
         prefix, exception_occurred = self.ident.split('/')[0], False
-        index, wait, sleep_seconds_when_exception = '0', '5m', 1
+        index, wait, sleep_seconds_when_exception = '0', '1m', 1
         while not self.stopped:
             try:
                 # 通过传递index和wait参数来进行阻塞查询接口数据是否变更

@@ -92,6 +92,16 @@ class BaseConsulKvRegist(BaseConsulRegist):
                 exception_occurred = False
                 data, cache = json.loads(resp.data.decode('utf-8')), {}
                 for key in data:
+                    if not key.startswith(prefix):
+                        warn = (f'got invalid key {key} '
+                                f'that not startswith {prefix}, ignore')
+                        logger.warning(warn)
+                        continue
+                    if key.count('/') != 2:
+                        warn = (f'got invalid key {key} '
+                                f'that not {key}/name/host:port, ignore')
+                        logger.warning(warn)
+                        continue
                     all_parts = key.rsplit('/')
                     name, addr = all_parts[-2], all_parts[-1]
                     connection = Connection(*addr.split(':', 1))

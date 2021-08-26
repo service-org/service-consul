@@ -92,14 +92,16 @@ class BaseConsulKvRegist(BaseConsulRegist):
                 exception_occurred = False
                 data, cache = json.loads(resp.data.decode('utf-8')), {}
                 for key in data:
+                    # 1. 全路径必须以prefix开头
                     if not key.startswith(prefix):
                         warn = (f'got invalid key {key} '
-                                f'that not startswith {prefix}, ignore')
+                                f'that not startswith {prefix}, skip')
                         logger.warning(warn)
                         continue
+                    # 2. prefix/name/host:port
                     if key.count('/') != 2:
                         warn = (f'got invalid key {key} '
-                                f'that not {key}/name/host:port, ignore')
+                                f'that not {key}name/host:port, skip')
                         logger.warning(warn)
                         continue
                     all_parts = key.rsplit('/')

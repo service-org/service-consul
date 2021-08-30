@@ -23,7 +23,8 @@ class Consul(Dependency):
             alias: t.Text,
             data_center: t.Optional[t.Text] = None,
             connect_options: t.Optional[t.Dict[t.Text, t.Any]] = None,
-            **kwargs: t.Text) -> None:
+            **kwargs: t.Text
+    ) -> None:
         """ 初始化实例
 
         @param alias: 配置别名

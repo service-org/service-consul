@@ -28,7 +28,7 @@ class ConsulProxy(object):
 
         @param alias: 配置别名
         @param options: 其它选项
-        @return: Consul
+        @return: ConsulClient
         """
         cur_options = self.options
         # 调用时传递的参数配置优先级最高

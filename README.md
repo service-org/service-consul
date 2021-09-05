@@ -94,7 +94,6 @@ service = Service()
 > core shell --shell `shell`
 
 ```shell
-C:\Program Files\Python39\lib\site-packages\service_core-0.0.1-py3.9.egg\service_core\cli\main.py:39: UserWarning:
 * eventlet 0.31.1
     - platform: macOS 10.15.7
       error  : changelist must be an iterable of select.kevent objects

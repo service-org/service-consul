@@ -33,7 +33,7 @@ class ConsulProxy(object):
         cur_options = self.options
         # 调用时传递的参数配置优先级最高
         cur_options.update(options)
-        config = self.config.get(f'{CONSUL_CONFIG_KEY}.{alias}', default={})
+        config = self.config.get(f'{CONSUL_CONFIG_KEY}.{alias}.connect_options', default={})
         # 调用时传递的参数配置优先级最高
         config.update(cur_options)
         return ConsulClient(**config)

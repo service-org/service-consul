@@ -30,6 +30,7 @@ class Consul(Dependency):
         @param alias: 配置别名
         @param data_center: 数据中心
         @param connect_options: 连接配置
+        @param kwargs: 其它配置
         """
         self.alias = alias
         self.client = None

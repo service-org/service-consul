@@ -60,7 +60,7 @@ class Service(BaseService):
     desc = 'demo'
 
     # 作为依赖项
-    consul_kv = ApiSixConsulKvRegist(alias='test', skip_inject=True)
+    consul_kv: ApiSixConsulKvRegist = ApiSixConsulKvRegist(alias='test', skip_inject=True)
 
     @croniter.cron('* * * * * */1')
     def test_croniter_every_second_with_exec_atonce(self) -> None:

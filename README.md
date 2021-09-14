@@ -18,8 +18,7 @@ pip install -U service-consul
 CONSUL:
   test:
     connect_options:
-      host: 127.0.0.1
-      port: 8500
+      base_url: http://127.0.0.1:8500
 CONTEXT:
   - service_consul.cli.subctxs.consul:Consul
 ```

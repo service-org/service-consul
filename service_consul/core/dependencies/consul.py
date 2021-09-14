@@ -13,11 +13,7 @@ from service_core.core.service.dependency import Dependency
 
 
 class Consul(Dependency):
-    """ Consul依赖类
-
-    1. 基于它的注册发现子类常对外暴露client和cache所以无需重写get_instance方法
-    2. 此扩展无需在每次请求时都注入一次get_instance实例,请设置skip_inject=True
-    """
+    """ Consul依赖类 """
 
     def __init__(
             self,
@@ -43,8 +39,9 @@ class Consul(Dependency):
         """
         connect_options = self.container.config.get(f'{CONSUL_CONFIG_KEY}.{self.alias}.connect_options', default={})
         # 防止YAML中声明值为None
-        connect_options = (connect_options or {}) | self.connect_options
-        self.client = ConsulClient(**connect_options)
+        self.connect_options = (connect_options or {}) | self.connect_options
+        # 主要用于共享已注册的服务
+        self.client = ConsulClient(**self.connect_options)
 
     def get_instance(self, context: WorkerContext) -> t.Any:
         """ 获取注入对象

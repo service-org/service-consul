@@ -32,44 +32,30 @@ class BaseConsulClient(object):
     """ Consul客户端基类 """
 
     def __init__(
-            self, *,
+            self,
             host: t.Optional[t.Text] = None,
             port: t.Optional[int] = None,
             debug: t.Optional[bool] = None,
             scheme: t.Optional[t.Text] = None,
-            verify: t.Optional[bool] = None,
-            cert: t.Optional[t.Text] = None,
             acl_token: t.Optional[t.Text] = None,
-            pool_size: t.Optional[int] = None
+            pool_size: t.Optional[int] = None,
+            data_center: t.Optional[t.Text] = None
     ) -> None:
-        """ 初始化实例
-
-        @param host     : 目标地址
-        @param port     : 目标端口
-        @param debug    : 开启调试
-        @param scheme   : 使用协议
-        @param verify   : 是否验证
-        @param cert     : 指定证书
-        @param acl_token: 请求令牌
-        @param pool_size: 池子大小
-        """
-        self.host = host or '127.0.0.1'
+        """ 初始化实例 """
         self.port = port or 8500
-        self.cert = cert
-
-        self.schema = scheme or 'http'
-        self.verify = verify or False
         self.acl_token = acl_token
-        # 开启debug的模式打印请求
+        self.host = host or '127.0.0.1'
+        self.schema = scheme or 'http'
         req_logger = getLogger('urllib3')
         debug and req_logger.setLevel(
             level=logging.DEBUG
         )
-        # 创建一个请求连接池管理器
         pool_size = pool_size or 10240
         self.http = urllib3.PoolManager(
             num_pools=pool_size
         )
+        self.data_center = data_center
+        self.registered_services = {}
 
     def __new__(cls, *args: t.Any, **kwargs: t.Any) -> BaseConsulClient:
         """ 创建接口实例

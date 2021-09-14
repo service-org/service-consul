@@ -34,7 +34,6 @@ class BaseConsulKvRegist(BaseConsulRegist):
         @param skip_loaded: 跳过加载
         """
         super(BaseConsulKvRegist, self).__init__(alias, **kwargs)
-        self.cache = {}
         self.ident = None
         self.value = None
         self.key_format = key_format  # DEFAULT_APISIX_CONSUL_KEY_FORMAT
@@ -83,15 +82,14 @@ class BaseConsulKvRegist(BaseConsulRegist):
             try:
                 # 通过传递index和wait参数来进行阻塞查询接口数据是否变更
                 fields = {'keys': True, 'index': index, 'wait': wait,
-                          'dc': self.data_center, 'recurse': True}
+                          'dc': self.client.data_center, 'recurse': True}
                 # 如果之前发生了未知异常(如连接异常)则尝试重新注册此服务
                 exception_occurred and self.client.kv.put_kv(
                     self.ident, body=self.value, retries=False
                 )
                 resp = self.client.kv.get_kv(prefix, fields=fields, retries=False)
-                exception_occurred = False
-                data, cache = json.loads(resp.data.decode('utf-8')), {}
-                for key in data:
+                exception_occurred, services = False, {}
+                for key in json.loads(resp.data.decode('utf-8')):
                     # 1. 全路径必须以prefix开头
                     if not key.startswith(prefix):
                         warn = (f'got invalid key {key} '
@@ -107,10 +105,10 @@ class BaseConsulKvRegist(BaseConsulRegist):
                     all_parts = key.rsplit('/')
                     name, addr = all_parts[-2], all_parts[-1]
                     connection = Connection(*addr.split(':', 1))
-                    cache.setdefault(name, set())
-                    cache[name].add(connection)
-                self.cache = cache
-                all_service_str = os.linesep + pprint.pformat(self.cache)
+                    services.setdefault(name, set())
+                    services[name].add(connection)
+                self.client.registered_services = services
+                all_service_str = os.linesep + pprint.pformat(services)
                 logger.debug(f'registered services {all_service_str} updated')
                 index = resp.headers.get('X-Consul-Index', index)
                 # 优雅处理如ctrl + c, sys.exit, kill thread时的异常

@@ -54,8 +54,8 @@ class BaseConsulClient(object):
         self.http = urllib3.PoolManager(
             num_pools=pool_size
         )
-        self.data_center = data_center
         self.registered_services = {}
+        self.data_center = data_center or ''
 
     def __new__(cls, *args: t.Any, **kwargs: t.Any) -> BaseConsulClient:
         """ 创建接口实例

@@ -33,19 +33,26 @@ class BaseConsulClient(object):
 
     def __init__(
             self,
-            host: t.Optional[t.Text] = None,
-            port: t.Optional[int] = None,
+            base_url: t.Optional[t.Text],
             debug: t.Optional[bool] = None,
-            scheme: t.Optional[t.Text] = None,
             acl_token: t.Optional[t.Text] = None,
             pool_size: t.Optional[int] = None,
             data_center: t.Optional[t.Text] = None
     ) -> None:
-        """ 初始化实例 """
-        self.port = port or 8500
+        """ 初始化实例
+
+        @param debug: 开启调试?
+        @param base_url:  Url前缀
+        @param acl_token: Acl令牌
+        @param pool_size: 池子大小
+        @param data_center: 数据中心
+        """
+        if base_url.endswith('/'):
+            base_url = base_url.rstrip('/')
+            self.base_url = base_url
+        else:
+            self.base_url = base_url
         self.acl_token = acl_token
-        self.host = host or '127.0.0.1'
-        self.schema = scheme or 'http'
         req_logger = getLogger('urllib3')
         debug and req_logger.setLevel(
             level=logging.DEBUG
@@ -145,11 +152,8 @@ class BaseConsulClient(object):
         if 'base_url' in kwargs and kwargs['base_url']:
             base_url = kwargs.pop('base_url')
         else:
-            base_url = f'{self.schema}://{self.host}:{self.port}'
-        if url.startswith(('http', 'https')):
-            endpoint = url
-        else:
-            endpoint = f'{base_url}{url}'
+            base_url = self.base_url
+        endpoint = url if url.startswith(('http', 'https')) else f'{base_url}{url}'
         rsp = self.http.request(method, endpoint, **kwargs)
         if (
                 HTTPStatus.OK.value

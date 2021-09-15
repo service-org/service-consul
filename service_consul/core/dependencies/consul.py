@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import typing as t
 
-from service_consul.core.consul import ConsulClient
+from service_consul.core.client import ConsulClient
 from service_core.core.context import WorkerContext
 from service_consul.constants import CONSUL_CONFIG_KEY
 from service_core.core.service.dependency import Dependency

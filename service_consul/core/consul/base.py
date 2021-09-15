@@ -130,7 +130,7 @@ class BaseConsulClient(object):
         method = 'DELETE'
         return self.request(method, url, **kwargs)
 
-    def request(self, method: t.Text, url: t.Text, **kwargs: t.Text) -> t.Any:
+    def request(self, method: t.Text, url: t.Text, **kwargs: t.Any) -> t.Any:
         """ 请求处理方法
 
         :param method: 请求方法

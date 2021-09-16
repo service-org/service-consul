@@ -80,7 +80,7 @@ class BaseConsulClient(object):
             setattr(instance, name, api)
         return curr_consul_client_instance
 
-    def get(self, url: t.Text, **kwargs: t.Text) -> t.Any:
+    def get(self, url: t.Text, **kwargs: t.Any) -> t.Any:
         """ 请求方法 - GET
 
         @param url: 请求地址
@@ -90,7 +90,7 @@ class BaseConsulClient(object):
         method = 'GET'
         return self.request(method, url, **kwargs)
 
-    def post(self, url: t.Text, **kwargs: t.Text) -> t.Any:
+    def post(self, url: t.Text, **kwargs: t.Any) -> t.Any:
         """ 请求方法 - POST
 
         @param url: 请求地址
@@ -100,7 +100,7 @@ class BaseConsulClient(object):
         method = 'POST'
         return self.request(method, url, **kwargs)
 
-    def put(self, url: t.Text, **kwargs: t.Text) -> t.Any:
+    def put(self, url: t.Text, **kwargs: t.Any) -> t.Any:
         """ 请求方法 - PUT
 
         @param url: 请求地址
@@ -110,7 +110,7 @@ class BaseConsulClient(object):
         method = 'PUT'
         return self.request(method, url, **kwargs)
 
-    def patch(self, url: t.Text, **kwargs: t.Text) -> t.Any:
+    def patch(self, url: t.Text, **kwargs: t.Any) -> t.Any:
         """ 请求方法 - PATCH
 
         @param url: 请求地址
@@ -120,7 +120,7 @@ class BaseConsulClient(object):
         method = 'PATCH'
         return self.request(method, url, **kwargs)
 
-    def delete(self, url: t.Text, **kwargs: t.Text) -> t.Any:
+    def delete(self, url: t.Text, **kwargs: t.Any) -> t.Any:
         """ 请求方法 - DELETE
 
         @param url: 请求地址

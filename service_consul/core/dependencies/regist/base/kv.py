@@ -24,7 +24,7 @@ Connection = namedtuple('Connection', ['host', 'port'])
 class BaseConsulKvRegist(BaseConsulRegist):
     """ Consul KV注册类 """
 
-    def __init__(self, alias: t.Text, key_format: t.Text = '', val_format: t.Text = '', **kwargs: t.Text) -> None:
+    def __init__(self, alias: t.Text, key_format: t.Text = '', val_format: t.Text = '', **kwargs: t.Any) -> None:
         """ 初始化实例
 
         @param alias: 配置别名

@@ -19,7 +19,7 @@ class Consul(Dependency):
             self,
             alias: t.Text,
             connect_options: t.Optional[t.Dict[t.Text, t.Any]] = None,
-            **kwargs: t.Text
+            **kwargs: t.Any
     ) -> None:
         """ 初始化实例
 

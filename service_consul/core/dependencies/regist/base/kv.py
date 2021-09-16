@@ -76,30 +76,25 @@ class BaseConsulKvRegist(BaseConsulRegist):
 
         @return:None
         """
-        prefix, exception_occurred = self.ident.split('/')[0], False
-        index, wait, sleep_seconds_when_exception = '0', '1m', 1
+        prefix = self.ident.split('/')[0]
+        index, wait, sleep = '0', '1m', 1
         while not self.stopped:
             try:
                 # 通过传递index和wait参数来进行阻塞查询接口数据是否变更
                 fields = {'keys': True, 'index': index, 'wait': wait,
                           'dc': self.client.data_center, 'recurse': True}
-                # 如果之前发生了未知异常(如连接异常)则尝试重新注册此服务
-                exception_occurred and self.client.kv.put_kv(
-                    self.ident, body=self.value, retries=False
-                )
+                self.client.kv.put_kv(self.ident, body=self.value, retries=False)
                 resp = self.client.kv.get_kv(prefix, fields=fields, retries=False)
-                exception_occurred, services = False, {}
+                services = {}
                 for key in json.loads(resp.data.decode('utf-8')):
                     # 1. 全路径必须以prefix开头
                     if not key.startswith(prefix):
-                        warn = (f'got invalid key {key} '
-                                f'that not startswith {prefix}, skip')
+                        warn = f'got invalid key {key} that not startswith {prefix}, skip'
                         logger.warning(warn)
                         continue
                     # 2. prefix/name/host:port
                     if key.count('/') != 2:
-                        warn = (f'got invalid key {key} '
-                                f'that not {key}name/host:port, skip')
+                        warn = f'got invalid key {key} that not {key}name/host:port, skip'
                         logger.warning(warn)
                         continue
                     all_parts = key.rsplit('/')
@@ -115,7 +110,6 @@ class BaseConsulKvRegist(BaseConsulRegist):
             except (KeyboardInterrupt, SystemExit, GreenletExit):
                 break
             except:
-                exception_occurred = True
                 # 应该避免其它未知异常中断当前触发器导致检测任务无法被调度
                 logger.error(f'unexpected error while watch key', exc_info=True)
-                eventlet.sleep(sleep_seconds_when_exception)
+                eventlet.sleep(sleep)

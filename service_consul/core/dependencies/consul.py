@@ -42,9 +42,9 @@ class Consul(Dependency):
         # 主要用于共享已注册的服务
         self.client = ConsulClient(**self.connect_options)
 
-    def get_instance(self) -> t.Any:
+    def get_instance(self) -> ConsulClient:
         """ 获取注入对象
 
-        @return: t.Any
+        @return: ConsulClient
         """
         return self.client

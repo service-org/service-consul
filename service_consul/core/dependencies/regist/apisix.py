@@ -15,6 +15,8 @@ DEFAULT_APISIX_CONSUL_VAL_FORMAT = '{"weight": 1, "max_fails": 2, "fail_timeout"
 class ApiSixConsulKvRegist(BaseConsulKvRegist):
     """ Apisix注册类 """
 
+    name = 'ApiSixConsulKvRegist'
+
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         """ 初始化实例
 

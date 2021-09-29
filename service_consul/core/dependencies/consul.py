@@ -14,6 +14,8 @@ from service_core.core.service.dependency import Dependency
 class Consul(Dependency):
     """ Consul依赖类 """
 
+    name = 'Consul'
+
     def __init__(
             self,
             alias: t.Text,

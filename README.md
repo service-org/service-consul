@@ -110,7 +110,7 @@ service = Service()
 2021-08-04 11:22:02,332 - 13808 - DEBUG - load subctx service_consul.cli.subctxs.consul:Consul succ
 PtPython - 3.9.6 (tags/v3.9.6:db3ff76, Jun 28 2021, 15:26:21) [MSC v.1929 64 bit (AMD64)]
 >>> import json
->>> resp = s.consul.proxy(alias='test').kv.get_kv('apisix-service-upstreams', fields={'keys': True})
+>>> resp = s.consul.proxy(alias='test').kv.read('apisix-service-upstreams', fields={'keys': True})
 >>> json.loads(resp.data.decode('utf-8'))
 ['apisix-service-upstreams/demo/10.219.255.176:49234']
 ```

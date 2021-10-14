@@ -58,7 +58,7 @@ class BaseConsulKvRegist(BaseConsulRegist):
 
         @return: None
         """
-        self.client.kv.put_kv(self.ident, body=self.value)
+        self.client.kv.upsert(self.ident, body=self.value)
         super(BaseConsulKvRegist, self).start()
 
     def stop(self) -> None:
@@ -83,8 +83,8 @@ class BaseConsulKvRegist(BaseConsulRegist):
                 # 通过传递index和wait参数来进行阻塞查询接口数据是否变更
                 fields = {'keys': True, 'index': index, 'wait': wait,
                           'dc': self.client.data_center, 'recurse': True}
-                self.client.kv.put_kv(self.ident, body=self.value, retries=False)
-                resp = self.client.kv.get_kv(prefix, fields=fields, retries=False)
+                self.client.kv.upsert(self.ident, body=self.value, retries=False)
+                resp = self.client.kv.read(prefix, fields=fields, retries=False)
                 services = {}
                 for key in json.loads(resp.data.decode('utf-8')):
                     # 1. 全路径必须以prefix开头

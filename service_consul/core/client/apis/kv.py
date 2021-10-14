@@ -6,16 +6,16 @@ from __future__ import annotations
 
 import typing as t
 
-from service_consul.core.consul.base import BaseConsulAPI
+from service_client.core.client import BaseClientAPI
 
 
-class KvAPI(BaseConsulAPI):
-    """ Agent接口类
+class KvAPI(BaseClientAPI):
+    """ Kv接口类
 
     doc: https://www.consul.io/api-docs/kv
     """
 
-    def get_kv(self, key: t.Text, **kwargs: t.Any) -> t.Text:
+    def read(self, key: t.Text, **kwargs: t.Any) -> t.Text:
         """ 读取键值
 
         doc: https://www.consul.io/api-docs/kv#read-key
@@ -26,7 +26,7 @@ class KvAPI(BaseConsulAPI):
         """
         return self._get(f'/v1/kv/{key}', **kwargs)
 
-    def put_kv(self, key: t.Text, **kwargs: t.Any) -> t.Text:
+    def upsert(self, key: t.Text, **kwargs: t.Any) -> t.Text:
         """ 创建键值
 
         doc: https://www.consul.io/api-docs/kv#create-update-key
@@ -37,7 +37,7 @@ class KvAPI(BaseConsulAPI):
         """
         return self._put(f'/v1/kv/{key}', **kwargs)
 
-    def delete_kv(self, key: t.Text, **kwargs: t.Any) -> t.Text:
+    def delete(self, key: t.Text, **kwargs: t.Any) -> t.Text:
         """ 删除键值
 
         doc: https://www.consul.io/api-docs/kv#delete-key

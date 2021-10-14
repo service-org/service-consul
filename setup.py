@@ -26,7 +26,5 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.9',
     ],
-    install_requires=[
-        'service-core', 'service-green', 'urllib3==1.26.6'
-    ]
+    install_requires=['service-core', 'service-green']
 )

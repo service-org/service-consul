@@ -34,7 +34,7 @@ class ConsulClient(BaseClient):
         @param pool_options: 池配置
         """
         super(ConsulClient, self).__init__(
-            base_url=base_url, debug=debug,
+            base_url, debug=debug,
             pool_options=pool_options
         )
         self.acl_token = acl_token

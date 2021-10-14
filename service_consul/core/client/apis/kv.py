@@ -24,6 +24,8 @@ class KvAPI(BaseClientAPI):
         @param kwargs: 请求参数
         @return: t.Text
         """
+        # 由于读取时基于Block-Query模式,所以请重置timeout
+        kwargs['timeout'] = None
         return self._get(f'/v1/kv/{key}', **kwargs)
 
     def upsert(self, key: t.Text, **kwargs: t.Any) -> t.Text:

@@ -66,7 +66,7 @@ class BaseConsulKvRegist(BaseConsulRegist):
 
         @return: None
         """
-        self.client.kv.delete_kv(self.ident)
+        self.client.kv.delete(self.ident)
         super(BaseConsulKvRegist, self).stop()
 
     def watch(self) -> None:

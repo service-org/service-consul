@@ -82,8 +82,6 @@ class BaseConsulKvRegist(BaseConsulRegist):
                           'dc': self.client.data_center, 'recurse': True}
                 self.client.kv.upsert(self.ident, body=self.value, retries=False)
                 resp = self.client.kv.read(prefix, fields=fields, retries=False)
-                data = resp.data.decode('utf-8')
-                logger.debug(f'registered services {data} updated')
                 index = resp.headers.get('X-Consul-Index', index)
                 # 优雅处理如ctrl + c, sys.exit, kill thread时的异常
             except (KeyboardInterrupt, SystemExit, GreenletExit):

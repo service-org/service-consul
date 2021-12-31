@@ -38,7 +38,6 @@ class ConsulClient(BaseClient):
             pool_options=pool_options
         )
         self.acl_token = acl_token
-        self.registered_services = {}
         self.data_center = data_center or ''
 
     def request(self, method: t.Text, url: t.Text, **kwargs: t.Any) -> t.Any:

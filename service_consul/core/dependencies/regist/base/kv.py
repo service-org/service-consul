@@ -4,9 +4,6 @@
 
 from __future__ import annotations
 
-import os
-import json
-import pprint
 import eventlet
 import typing as t
 
@@ -77,7 +74,7 @@ class BaseConsulKvRegist(BaseConsulRegist):
         @return:None
         """
         prefix = self.ident.split('/')[0]
-        index, wait, sleep = '0', '1m', 1
+        index, wait, sleep = '0', '10m', 1
         while not self.stopped:
             try:
                 # 通过传递index和wait参数来进行阻塞查询接口数据是否变更
@@ -85,26 +82,8 @@ class BaseConsulKvRegist(BaseConsulRegist):
                           'dc': self.client.data_center, 'recurse': True}
                 self.client.kv.upsert(self.ident, body=self.value, retries=False)
                 resp = self.client.kv.read(prefix, fields=fields, retries=False)
-                services = {}
-                for key in json.loads(resp.data.decode('utf-8')):
-                    # 1. 全路径必须以prefix开头
-                    if not key.startswith(prefix):
-                        warn = f'got invalid key {key} that not startswith {prefix}, skip'
-                        logger.warning(warn)
-                        continue
-                    # 2. prefix/name/host:port
-                    if key.count('/') != 2:
-                        warn = f'got invalid key {key} that not {key}name/host:port, skip'
-                        logger.warning(warn)
-                        continue
-                    all_parts = key.rsplit('/')
-                    name, addr = all_parts[-2], all_parts[-1]
-                    connection = Connection(*addr.split(':', 1))
-                    services.setdefault(name, set())
-                    services[name].add(connection)
-                self.client.registered_services = services
-                all_service_str = os.linesep + pprint.pformat(services)
-                logger.debug(f'registered services {all_service_str} updated')
+                data = resp.data.decode('utf-8')
+                logger.debug(f'registered services {data} updated')
                 index = resp.headers.get('X-Consul-Index', index)
                 # 优雅处理如ctrl + c, sys.exit, kill thread时的异常
             except (KeyboardInterrupt, SystemExit, GreenletExit):
